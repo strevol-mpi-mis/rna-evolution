@@ -9,62 +9,50 @@
 import numpy as np
 import RNA as rna 
 import random 
-from Individual import Individual
 import matplotlib.pyplot as plt
-import pandas
-import os
 import RNAEvolution
-import RNAEvolution2
 
 
 #Main function 
 def main() : 
     
    
-    population_size = 500
-    number_of_generation = 100
-    init_deph = 40
+    population_size = 200
+    number_of_generation = 70
+    init_deph = 76
     mut_prob = 1./(init_deph)
     mut_rate = 0.4
     mut_bp = 0.5
     lamdas = [0,0.5,1]
     k= 5
+    target_structure = "(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))...."
 
-    dataFrame = pandas.read_csv("../Logs/init_data/data1000_40.csv",sep=",")
-    
-    
-    ref_ind = Individual((dataFrame.values)[0,1:][0],(dataFrame.values)[0,1:][1],(dataFrame.values)[0,1:][2])
-    print ("RNA_ref = " + ref_ind.RNA_seq)
 
-    init_pop = []
-    for ind in (dataFrame.values)[1:population_size+1,1:] : 
-        init_pop.append(Individual(ind[0],ind[1],ind[2]))
-    
-    print (population_size, len(init_pop))
+    mut_probs = np.array(rna.ptable(target_structure)[1:])
+    mut_probs = mut_probs + mut_prob
+    mut_probs[mut_probs>mut_prob] = 0
 
-    """
-    for mut_prob in [0.025,0.1, 0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1] : 
-        print("Mut prob = ", mut_prob)
-        RNAEvolution.evolution(ref_ind,init_pop,"Repport",population_size, number_of_generation, mut_prob,)
-        print("=================================")
-    """
-    RNAEvolution2.evolution(ref_ind,init_pop,"Repport",population_size, number_of_generation, mut_prob,mut_rate)
-        
-    """
-    meanHist = []
-    for i in range(100) : 
-        meanHist.append(pandas.read_csv("Logs/log_"+rna_str[:7]+"fitnessGen"+str(i+1)+".csv",sep=','))
-    
-    means = []
-    for df in meanHist :
-        means.append(((df.agg(['mean']).round(decimals=2)).values)[0,1])
-    #meanDf = pandas.DataFrame(np.array(sorted(means))) 
-    #fig, ax = plt.subplots()
-    #meanDf.plot.kde(ax=ax,legend=False, title='Mean Evolution')
-    plt.plot(means,title='Mean Evolution')
-    plt.savefig("Logs/log_"+rna_str[:7]+".mean.eps")
-    plt.show()
-    """
+
+    rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,target_structure, init_deph)
+
+    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,2)
+
+    list_fitness = [] 
+    good_result = []
+    for ind in result : 
+        print ind
+        if ind.fitness !=0 : 
+            list_fitness.append(ind.fitness)
+            good_result.append(ind)
+    list_fitness = sorted(list_fitness, reverse=True) 
+
+    sorted_pop = [ ] 
+    for fitness in list_fitness : 
+        for ind in good_result : 
+            if ind.fitness == fitness : 
+                sorted_pop.append(ind)
+    for i in range(10) : 
+        print sorted_pop[i].RNA_seq, sorted_pop[i].mfe, sorted_pop[i].fitness
 if __name__== "__main__" : 
 
     main()

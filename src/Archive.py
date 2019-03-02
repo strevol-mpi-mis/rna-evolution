@@ -1,4 +1,9 @@
+"""
+    @author: Nono Saha Cyrille Merleau 
+    @email: nonosaha@mis.mpg.de 
 
+
+"""
 import numpy 
 
 
@@ -32,9 +37,7 @@ class Archive :
     def novel_archiving(self, population, novelties) : 
         
         to_archive = []
-        sorted_novelties = sorted(novelties)#,reverse = True) 
-        #sorted_novelties = numpy.array(sorted_novelties)
-        #sorted_novelties = sorted_novelties[sorted_novelties>10]
+        sorted_novelties = sorted(novelties,reverse = True) 
         lamda_novelties = sorted_novelties[:self.max_size]
 
         for novelty in lamda_novelties : 

@@ -24,7 +24,7 @@ class Logger(object) :
     def save_population(self, population,gen) : 
         data = []
         for ind in population : 
-            data.append([ind.RNA_seq, ind.RNA_structure, ind.fitness])
+            data.append([ind.RNA_seq, ind.RNA_structure, ind.fitness, ind.mfe])
     
         dataFrame = pandas.DataFrame(data)
         dataFrame.to_csv(self.root_path+"/gen"+str(gen)+".csv")
