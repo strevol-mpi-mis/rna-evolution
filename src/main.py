@@ -18,15 +18,16 @@ def main() :
     
    
     population_size = 200
-    number_of_generation = 70
-    init_deph = 76
-    mut_prob = 1./(init_deph)
+    number_of_generation = 100
     mut_rate = 0.4
     mut_bp = 0.5
     lamdas = [0,0.5,1]
     k= 5
-    target_structure = "(((((((..((((........)))).(((((.......))))).....(((((.......))))))))))))...."
-
+    target_structure = ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
+    init_deph = len(target_structure)
+    print "Length ==", init_deph
+    mut_prob = 1./(init_deph)
+    
 
     mut_probs = np.array(rna.ptable(target_structure)[1:])
     mut_probs = mut_probs + mut_prob
@@ -35,7 +36,7 @@ def main() :
 
     rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,target_structure, init_deph)
 
-    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,2)
+    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,1)
 
     list_fitness = [] 
     good_result = []
