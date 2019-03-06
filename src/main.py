@@ -17,8 +17,8 @@ import RNAEvolution
 def main() : 
     
    
-    population_size = 200
-    number_of_generation = 100
+    population_size = 300
+    number_of_generation = 600
     mut_rate = 0.4
     mut_bp = 0.5
     lamdas = [0,0.5,1]
@@ -27,7 +27,7 @@ def main() :
     init_deph = len(target_structure)
     print "Length ==", init_deph
     mut_prob = 1./(init_deph)
-    
+    mut_prob = 0.001
 
     mut_probs = np.array(rna.ptable(target_structure)[1:])
     mut_probs = mut_probs + mut_prob

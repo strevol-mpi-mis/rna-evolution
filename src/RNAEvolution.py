@@ -30,13 +30,16 @@ class RNAEvolution(object) :
     
     
     #Compute the fitness of an RNA Structure
-    def fitness(self, structure) : 
+    def tree_edit_fitness(self, structure) : 
         ref_xstrc = RNA.expand_Full(self.initializer.target_structure)
         xstrc = RNA.expand_Full(structure)
         
         return 1./(1.+RNA.tree_edit_distance(RNA.make_tree(ref_xstrc), RNA.make_tree(xstrc)))
 
-    
+    #Compute the fitness of an RNA Structure
+    def base_paire_fitness(self, structure) : 
+        return 1./(1.+RNA.bp_distance(self.initializer.target_structure,structure))
+
 
     #Mutation function 
     def mutateOne(self, individual, mut_p, mut_bp) :  
@@ -63,7 +66,7 @@ class RNAEvolution(object) :
         
 
         (RNA_strc, mef) = RNA.fold(''.join(RNA_seq))
-        return Individual.Individual(''.join(RNA_seq), RNA_strc,self.fitness(RNA_strc), mef)
+        return Individual.Individual(''.join(RNA_seq), RNA_strc,self.base_paire_fitness(RNA_strc), mef)
 
 
 
@@ -143,7 +146,7 @@ class RNAEvolution(object) :
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
         print "Start running jog"
-        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.fitness, self.mutateAll, self.mutateOne,),
+        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.tree_edit_fitness, self.mutateAll, self.mutateOne,),
                                                ("numpy", "Individual", "RNAEvolution2", "RNA", "random","Logger","pandas","os","Initializer"))) for task in tasks]
         
         for task, job in jobs : 

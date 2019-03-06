@@ -43,11 +43,15 @@ class Initializer(object) :
         return np.array(list(set(pop)))
     
     #Compute the fitness of an RNA Structure
-    def fitness(self, structure) : 
+    def tree_edit_fitness(self, structure) : 
         ref_xstrc = RNA.expand_Full(self.target_structure)
         xstrc = RNA.expand_Full(structure)
         
         return 1./(1.+RNA.tree_edit_distance(RNA.make_tree(ref_xstrc), RNA.make_tree(xstrc)))
+
+    #Compute the fitness of an RNA Structure
+    def base_paire_fitness(self, structure) : 
+        return 1./(1.+RNA.bp_distance(self.target_structure,structure))
 
     def initialize(self) : 
         n = 0 
@@ -55,11 +59,15 @@ class Initializer(object) :
         nucluotides = ["A", "G", "U", "C"]
         init_depth = len(self.target_structure)
         for i in range(self.population_size):
-            arn = numpy.random.choice(nucluotides,init_depth)
-            seq = ''.join(arn)
+            if i < 4 : 
+                arn = numpy.random.choice(nucluotides[i:i+1],init_depth)
+                seq = ''.join(arn)
+            else : 
+                arn = numpy.random.choice(nucluotides,init_depth)
+                seq = ''.join(arn)
             (strc, mfe) = RNA.fold(seq)
 
-            ind = Individual(seq,strc,self.fitness(strc), mfe)
+            ind = Individual(seq,strc,self.base_paire_fitness(strc), mfe)
             population.append(ind)
 
         return population
