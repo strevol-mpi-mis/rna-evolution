@@ -11,19 +11,21 @@ import RNA as rna
 import random 
 import matplotlib.pyplot as plt
 import RNAEvolution
+import Landscape
 
 
 #Main function 
 def main() : 
     
    
-    population_size = 300
-    number_of_generation = 600
+    population_size = 100
+    number_of_generation = 1000
     mut_rate = 0.4
     mut_bp = 0.5
-    lamdas = [0,0.5,1]
-    k= 5
-    target_structure = ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
+    lamda = 0.2
+    k= 15
+    type_ = "tree"
+    target_structure = "(((((.....))..((.........)))))"
     init_deph = len(target_structure)
     print "Length ==", init_deph
     mut_prob = 1./(init_deph)
@@ -33,8 +35,8 @@ def main() :
     mut_probs = mut_probs + mut_prob
     mut_probs[mut_probs>mut_prob] = 0
 
-
-    rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,target_structure, init_deph)
+    landscape = Landscape.Landscape(lamda, k, type_, target_structure)
+    rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,landscape)
 
     result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,1)
 

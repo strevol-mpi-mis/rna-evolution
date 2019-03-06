@@ -20,27 +20,15 @@ import pp
 
 class RNAEvolution(object) : 
 
-    def __init__ (self, population_size, lamda, archive, target_structure,  init_depth=10) : 
+    def __init__ (self, population_size, lamda, archive, landscape) : 
 
         self.population_size = population_size 
-        self.init_depth = init_depth 
         self.lamda = lamda
         self.archive = archive
-        self.initializer = Initializer.Initializer(target_structure, population_size)
+        self.initializer = Initializer.Initializer(landscape, population_size)
+        self.landscape = landscape
+
     
-    
-    #Compute the fitness of an RNA Structure
-    def tree_edit_fitness(self, structure) : 
-        ref_xstrc = RNA.expand_Full(self.initializer.target_structure)
-        xstrc = RNA.expand_Full(structure)
-        
-        return 1./(1.+RNA.tree_edit_distance(RNA.make_tree(ref_xstrc), RNA.make_tree(xstrc)))
-
-    #Compute the fitness of an RNA Structure
-    def base_paire_fitness(self, structure) : 
-        return 1./(1.+RNA.bp_distance(self.initializer.target_structure,structure))
-
-
     #Mutation function 
     def mutateOne(self, individual, mut_p, mut_bp) :  
         base_paire = ["AU","UA","GU","GC","UG","CG"]
@@ -55,7 +43,7 @@ class RNAEvolution(object) :
                 RNA_seq.append(selct[0])
             else : 
                 RNA_seq.append(individual.RNA_seq[i])
-        pos = individual.get_bp_position(self.initializer.target_structure)
+        pos = individual.get_bp_position(self.landscape.target_structure)
 
         for bp_cord in pos : 
             r = random.uniform(0,1)
@@ -66,7 +54,7 @@ class RNAEvolution(object) :
         
 
         (RNA_strc, mef) = RNA.fold(''.join(RNA_seq))
-        return Individual.Individual(''.join(RNA_seq), RNA_strc,self.base_paire_fitness(RNA_strc), mef)
+        return Individual.Individual(''.join(RNA_seq), RNA_strc,self.landscape.fitness(RNA_strc), mef)
 
 
 
@@ -93,12 +81,28 @@ class RNAEvolution(object) :
         return selected
 
 
-    #Transform a list of RNA sequence to a list of RNA structure 
-    def toRNAstructure(list_of_RNA_sequences) : 
-        result = [] 
-        for seq in list_of_RNA_sequences : 
-            result.append(RNA.fold(seq)[0])
-        return result 
+    #################
+    # Natural selection based on fitness proportionate and novelty proportion 
+    def novelty_selection(self,population,size) : 
+
+        sum_fitness = 0 
+        sum_novelty = 0
+        saved_novelty = [] 
+        lamda = self.landscape.lamda
+        k = self.landscape.k
+        for ind in population : 
+            sum_fitness += ind.fitness 
+            n = self.landscape.novelty(ind.RNA_structure, population)
+            sum_novelty += n 
+            saved_novelty.append(n)
+        #self.archiving.archive(population, saved_novelty)
+        proportion_prob = []
+        for i in range(len(population)) : 
+            proportion_prob.append((1-lamda)*(population[i].fitness/sum_fitness) + lamda*(saved_novelty[i]/sum_novelty))
+        
+        choices = numpy.random.choice(population,size=size,p=proportion_prob)
+        return choices
+
 
     '''
     This function is implementing the simple genetic algorithm
@@ -126,7 +130,10 @@ class RNAEvolution(object) :
         
             print ('Generation '+str(number_of_generation - n))
             newgeneration = []
-            selected_ind = self.fitness_proportion_selection(prev_population,population_size)
+            if self.landscape.lamda !=0 : 
+                selected_ind = self.novelty_selection(prev_population,population_size)
+            else:
+                selected_ind = self.fitness_proportion_selection(prev_population,population_size)
             newgeneration = self.mutateAll(selected_ind,mut_probs,mut_bp)
             
             prev_population = numpy.copy(newgeneration)
@@ -146,8 +153,8 @@ class RNAEvolution(object) :
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
         print "Start running jog"
-        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.tree_edit_fitness, self.mutateAll, self.mutateOne,),
-                                               ("numpy", "Individual", "RNAEvolution2", "RNA", "random","Logger","pandas","os","Initializer"))) for task in tasks]
+        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.mutateAll, self.mutateOne,),
+                                               ("numpy", "Individual", "RNAEvolution2", "RNA", "random","Logger","pandas","os","Initializer", "Landscape"))) for task in tasks]
         
         for task, job in jobs : 
             gen = job()
