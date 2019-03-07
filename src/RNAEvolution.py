@@ -108,7 +108,7 @@ class RNAEvolution(object) :
         list_fitness = [] 
         for ind in population : 
             list_fitness.append(ind.fitness)
-        list_fitness = sorted(list_fitness) 
+        list_fitness = sorted(list_fitness, reverse=True) 
 
         sorted_pop = [ ] 
         for fitness in list_fitness : 
@@ -134,7 +134,7 @@ class RNAEvolution(object) :
     def simple_EA(self, number_of_generation, mut_probs, log_folder, mut_bp) : 
     
         print (" Starting of evolution ")
-        prev_population = self.initializer.initialize() #Initialize the population of RNA
+        prev_population = self.initializer.initialize_from_csv("../Logs/init_data/data1000_ham_ 30.csv") #Initialize the population of RNA
         population_size = self.initializer.population_size
         n = number_of_generation
         

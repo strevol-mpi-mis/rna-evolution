@@ -19,12 +19,12 @@ def main() :
     
    
     population_size = 100
-    number_of_generation = 500
+    number_of_generation = 5000
     mut_rate = 0.4
     mut_bp = 0.5
-    lamda = 0.3
+    lamda = 1
     k= 15
-    type_ = "tree"
+    type_ = "ham"
     target_structure = "(((((.....))..((.........)))))"
     init_deph = len(target_structure)
     print "Length ==", init_deph
