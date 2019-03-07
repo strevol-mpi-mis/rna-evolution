@@ -19,10 +19,10 @@ def main() :
     
    
     population_size = 100
-    number_of_generation = 1000
+    number_of_generation = 500
     mut_rate = 0.4
     mut_bp = 0.5
-    lamda = 0.2
+    lamda = 0.3
     k= 15
     type_ = "tree"
     target_structure = "(((((.....))..((.........)))))"

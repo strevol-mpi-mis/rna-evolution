@@ -103,6 +103,21 @@ class RNAEvolution(object) :
         choices = numpy.random.choice(population,size=size,p=proportion_prob)
         return choices
 
+    
+    def reproduce(self, population, size) : 
+        list_fitness = [] 
+        for ind in population : 
+            list_fitness.append(ind.fitness)
+        list_fitness = sorted(list_fitness) 
+
+        sorted_pop = [ ] 
+        for fitness in list_fitness : 
+            for ind in population : 
+                if ind.fitness == fitness : 
+                    sorted_pop.append(ind)
+        return sorted_pop[:size]
+ 
+
 
     '''
     This function is implementing the simple genetic algorithm
@@ -130,11 +145,13 @@ class RNAEvolution(object) :
         
             print ('Generation '+str(number_of_generation - n))
             newgeneration = []
+            newgeneration =  self.reproduce(prev_population,int(0.1*population_size))
+            
             if self.landscape.lamda !=0 : 
                 selected_ind = self.novelty_selection(prev_population,population_size)
             else:
                 selected_ind = self.fitness_proportion_selection(prev_population,population_size)
-            newgeneration = self.mutateAll(selected_ind,mut_probs,mut_bp)
+            newgeneration = numpy.insert(newgeneration, len(newgeneration),self.mutateAll(selected_ind,mut_probs,mut_bp))
             
             prev_population = numpy.copy(newgeneration)
             n -=1
@@ -158,7 +175,7 @@ class RNAEvolution(object) :
         
         for task, job in jobs : 
             gen = job()
-            result = numpy.insert(result, 0, numpy.array(gen))
+            result = numpy.insert(result, 0, numpy.array(gen)[:10])
         
         print "End of jobs"
 
