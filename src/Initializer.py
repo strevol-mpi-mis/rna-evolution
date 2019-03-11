@@ -87,11 +87,11 @@ def main() :
     lamda = 0.3
     k= 15
     type_ = "ham"
-    target_structure = "(((((.....))..((.........)))))"
+    target_structure = ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
     init_depth = len(target_structure)
     print "Length ==", init_depth
     mut_prob = 1./(init_depth)
-    mut_prob = 0.001
+    #mut_prob = 0.001
 
     mut_probs = numpy.array(RNA.ptable(target_structure)[1:])
     mut_probs = mut_probs + mut_prob
@@ -99,7 +99,8 @@ def main() :
 
     landscape = Landscape.Landscape(lamda, k, type_, target_structure)
         
-    data = [["NA", "(((((.....))..((.........)))))",0, 1]] 
+    data = [["NA", ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
+    ,0, 1]] 
         
     initializer = Initializer(landscape,population_size)
         

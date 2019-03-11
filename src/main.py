@@ -19,13 +19,13 @@ def main() :
     
    
     population_size = 100
-    number_of_generation = 5000
+    number_of_generation = 300
     mut_rate = 0.4
     mut_bp = 0.5
     lamda = 1
     k= 15
     type_ = "ham"
-    target_structure = "(((((.....))..((.........)))))"
+    target_structure = "............((((......)))).....(((((((((........)).))))))).......((.(((((..(((....)))..)))))))......"
     init_deph = len(target_structure)
     print "Length ==", init_deph
     mut_prob = 1./(init_deph)

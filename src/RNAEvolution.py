@@ -134,11 +134,12 @@ class RNAEvolution(object) :
     def simple_EA(self, number_of_generation, mut_probs, log_folder, mut_bp) : 
     
         print (" Starting of evolution ")
-        prev_population = self.initializer.initialize_from_csv("../Logs/init_data/data1000_ham_ 30.csv") #Initialize the population of RNA
+        #prev_population = self.initializer.initialize_from_csv("../Logs/init_data/data1000_ham_ 98.csv") #Initialize the population of RNA
+        prev_population = self.initializer.initialize() #Initialize the population of RNA
         population_size = self.initializer.population_size
         n = number_of_generation
         
-        logger = Logger.Logger(str(log_folder),str(self.lamda))
+        logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
         logger.save_population(prev_population,0)
         
         while (n > 0) :
