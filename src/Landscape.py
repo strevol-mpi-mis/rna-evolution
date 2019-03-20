@@ -50,8 +50,8 @@ class Landscape(object) :
 
         
         #Compute the fitness of an RNA Structure
-        def base_paire_fitness(self, structure) : 
-                return 1./(1.+RNA.bp_distance(self.target_structure,structure))
+        def base_paire_fitness(self,structure1, structure2) : 
+                return 1./(1.+RNA.bp_distance(structure1,structure2))
 
         #Compute the fitness of an RNA Structure
         def hamming_distance(self,ref_struc, structure) :
@@ -60,23 +60,23 @@ class Landscape(object) :
                         if ref_struc[i] != structure[i] : 
                                 distance +=1
                                 
-                return 1/(1+distance)
+                return distance
         
         def fitness(self, structure) : 
                 if self.type == self.BP_TYPE : 
-                        return self.base_paire_fitness(structure)
+                        return self.base_paire_fitness(self.target_structure,structure)
                 elif self.type == self.TREE_TYPE : 
                         return self.tree_edit_fitness(structure)
                 else: 
-                        return self.hamming_distance(self.target_structure, structure)
+                        return 1/(1. + self.hamming_distance(self.target_structure, structure))
         
 
         def novelty(self, structure, population) : 
                 list_novelty_metrics = []
 
                 for ind in population : 
-                        list_novelty_metrics.append(self.hamming_distance(structure,ind.RNA_structure))
+                        list_novelty_metrics.append(self.base_paire_fitness(structure,ind.RNA_structure))
 
-                list_novelty_metrics = sorted(list_novelty_metrics) 
+                list_novelty_metrics = list(set(list_novelty_metrics)) 
 
                 return sum(list_novelty_metrics[:self.k])/float(self.k)
