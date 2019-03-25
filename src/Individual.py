@@ -12,7 +12,7 @@ import RNA
 class Individual(object) : 
 
 
-    def __init__(self, RNA_seq, RNA_structure, fitness, mfe): 
+    def __init__(self, RNA_seq, RNA_structure, mfe, fitness): 
 
         self.RNA_seq = RNA_seq 
         self.RNA_structure = RNA_structure
