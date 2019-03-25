@@ -160,11 +160,9 @@ def run(number_of_generation, mut_probs, k, log_folder) :
     job_server = pp.Server(4, ppservers=ppservers)
     methods = ["N", "F", "S", "FREQ"]
 
-    jobs = [(method, job_server.submit(simple_EA, (target,number_of_generation, mut_probs,init_pop, k, method,log_folder), ( fitness_proportion_selection,mutateAll, mutateOne, frequency_proportion_selection, stochastic_selection, save_population,novelty, novelty_selection, fitness, hamming_distance),
-                                            ("numpy", "Individual", "RNA", "random","pandas","os", "collections"))) for method in methods]
+    for method in methods : 
+        simple_EA(target,number_of_generation, mut_probs,init_pop, k, method,log_folder)
     
-    for method , job in jobs : 
-        job()
     
 
 def main() : 
@@ -176,10 +174,10 @@ def main() :
 
     
     number_of_run  = int(sys.argv[1])
-    job_server = pp.Server(20, ppservers=ppservers)
+    job_server = pp.Server(0, ppservers=ppservers)
     
     print "Start running jog", number_of_run
-    """
+    
     jobs = [(task , job_server.submit(run, (number_of_generation, mut_prob, k, task,), ( fitness_proportion_selection,mutateAll, mutateOne, frequency_proportion_selection, stochastic_selection, save_population,novelty, novelty_selection, fitness, hamming_distance, simple_EA),
                                             ("numpy", "Individual", "RNA", "random","Logger","pandas","os","Initializer", "Landscape", "pp"))) for task in range(number_of_run)]
     
@@ -189,7 +187,7 @@ def main() :
     for i in range(number_of_run) : 
         run(number_of_generation,mut_prob, k ,  str(i)+"/")
     print "End of jobs"
-
+    """
 
 if __name__ == "__main__":
     main()
