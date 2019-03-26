@@ -91,9 +91,15 @@ def get_min_generation(interval) :
     for i in range(interval[0],interval[1]) : 
         min_gen  = []
         for method in  methods : 
-            files = os.listdir("../Logs/MyTest/"+str(i)+"/"+str(method)+"/")
-            min_gen.append(len(files)- 1) 
-        result.append(min_gen)
+            try : 
+                files = os.listdir("../Logs/MyTest2/"+str(i)+"/"+str(method)+"/")
+                min_gen.append(len(files)- 1) 
+            except : 
+                print "Folder ", i, "missed"
+                continue
+            
+        if len(min_gen) == 4 : 
+            result.append(min_gen)
     result = numpy.array(result)
     print 'Job numer ',interval," = ",  result.shape
     return numpy.array(result)
@@ -151,7 +157,7 @@ def main() :
     print "Starting pp with", job_server.get_ncpus(), "workers"
     print "Folder Number == ", folder_number
     
-    folders = range(1,  folder_number+101, 24)
+    folders = range(1,  folder_number+25, 24)
     intervales = []
     for i in range(len(folders)-1) : 
         intervales.append((folders[i], folders[i+1]))
@@ -160,14 +166,16 @@ def main() :
     print "Start running jog"
     jobs = [(interval, job_server.submit(get_min_generation, (interval,), modules=("numpy","pandas","os"))) for interval in intervales]
     
-    archive_strc = numpy.zeros((24,4))
-
+    #archive_strc = numpy.zeros((24,4))
+    archive_strc = [] 
     for folder, job in jobs:
         res = job()
-        archive_strc += res 
-    print archive_strc 
+        archive_strc.append(res) 
+    archive_strc = numpy.concatenate(archive_strc)
+
+    print archive_strc.shape
     print "                                      ", ["|| N ||", "|| F ||", "|| S ||", "|| FREQ ||"]
-    print "The average number of generations is ", numpy.mean(archive_strc, axis=0)/4
+    print "The average number of generations is ", numpy.median(archive_strc, axis=0)
     
           
    
