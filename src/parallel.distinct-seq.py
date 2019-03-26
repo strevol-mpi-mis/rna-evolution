@@ -65,7 +65,7 @@ def clusters(vector) :
             cluster = [vector[0]]
         
     return result
-
+"""
 def get_distinct_structure(interval, folder_num) : 
     lamdas = [1]
     result = []
@@ -73,18 +73,30 @@ def get_distinct_structure(interval, folder_num) :
         archive_strc = numpy.array([], dtype="S30")
         data = []
         for i in range(interval[0],interval[1]) : 
-            df = pandas.read_csv("../Logs/NoveltyExp/News/old-select/old-select/"+str(folder_num)+"/"+str(lamda)+"/gen"+str(i)+".csv", sep=",")
-            
-            population  = numpy.array( [ind[2] for ind in df.values])
-            #print population
-            population = numpy.insert(population,len(population),archive_strc)
-            strc = list(set(population))
-            archive_strc = numpy.insert(archive_strc,len(archive_strc),numpy.array(strc))
-            nb_strc = len(strc)
+            for lamda in  lamdas : 
+                maxs = []
+                files = os.listdir("../Logs/NoveltyExp/News/Mut80-9-1500/"+str(n)+"S/"+str(lamda)+"/")
+                nb_gen.append(len(files)- 1) 
+        histoData.append(nb_gen)
+
+    histoData = np.array(histoData)
     print 'Job numer ',interval," = ",len(strc)    
     return strc
-
-
+"""
+def get_min_generation(interval) : 
+    lamdas = [1]
+    result = []
+    methods = ["N", "F", "S", "FREQ"]
+    
+    for i in range(interval[0],interval[1]) : 
+        min_gen  = []
+        for method in  methods : 
+            files = os.listdir("../Logs/MyTest/"+str(i)+"/"+str(method)+"/")
+            min_gen.append(len(files)- 1) 
+        result.append(min_gen)
+    result = numpy.array(result)
+    print 'Job numer ',interval," = ",  result.shape
+    return numpy.array(result)
 
 
 def distinct(folder_num) : 
@@ -139,21 +151,23 @@ def main() :
     print "Starting pp with", job_server.get_ncpus(), "workers"
     print "Folder Number == ", folder_number
     
-    folders = range(1,  folder_number+101, 100)
+    folders = range(1,  folder_number+101, 24)
     intervales = []
     for i in range(len(folders)-1) : 
         intervales.append((folders[i], folders[i+1]))
     print intervales
     #Parallel evolution for every lamda value
     print "Start running jog"
-    jobs = [(interval, job_server.submit(get_distinct_structure, (interval,1), modules=("numpy","pandas","os"))) for interval in intervales]
+    jobs = [(interval, job_server.submit(get_min_generation, (interval,), modules=("numpy","pandas","os"))) for interval in intervales]
     
-    archive_strc = numpy.array([], dtype="S30")
+    archive_strc = numpy.zeros((24,4))
 
     for folder, job in jobs:
         res = job()
-        archive_strc = numpy.insert(archive_strc,len(archive_strc),numpy.array(res))
-    print "The total number of distinct structures is ", len(set(archive_strc))
+        archive_strc += res 
+    print archive_strc 
+    print "                                      ", ["|| N ||", "|| F ||", "|| S ||", "|| FREQ ||"]
+    print "The average number of generations is ", numpy.mean(archive_strc, axis=0)/4
     
           
    
