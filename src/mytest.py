@@ -147,9 +147,9 @@ def simple_EA(target, number_of_generation, mut_probs, init_pop,k, selection_met
 def run(number_of_generation, mut_probs, k, log_folder) : 
     nucluotides = ["G","C"]
     init_pop = []
-    init_depth = 12
-    target = "((.((...))))"
-
+    target = "((....)).((....))"
+    init_depth =len(target)
+    
     while len(init_pop)<100 :
         arn = numpy.random.choice(nucluotides,init_depth)
         seq = ''.join(arn)
@@ -174,7 +174,7 @@ def main() :
 
     
     number_of_run  = int(sys.argv[1])
-    job_server = pp.Server(20, ppservers=ppservers)
+    job_server = pp.Server(4, ppservers=ppservers)
     
     print "Start running jog", number_of_run
     

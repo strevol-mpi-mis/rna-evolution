@@ -157,7 +157,7 @@ def main() :
     print "Starting pp with", job_server.get_ncpus(), "workers"
     print "Folder Number == ", folder_number
     
-    folders = range(1,  folder_number+25, 24)
+    folders = range(0,  folder_number+26, 25)
     intervales = []
     for i in range(len(folders)-1) : 
         intervales.append((folders[i], folders[i+1]))
@@ -175,8 +175,11 @@ def main() :
 
     print archive_strc.shape
     print "                                      ", ["|| N ||", "|| F ||", "|| S ||", "|| FREQ ||"]
-    print "The average number of generations is ", numpy.median(archive_strc, axis=0)
+    print "The average number of generations is ", numpy.mean(archive_strc, axis=0)
+    print "The median number of generations is ",  numpy.median(archive_strc, axis=0)
     
+    print "Number of success === ", [ len(success[success<500]) for success in archive_strc.T]
+    print "Number of failures === ", [ len(success[success==500]) for success in archive_strc.T]
           
    
     
