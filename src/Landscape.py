@@ -77,6 +77,5 @@ class Landscape(object) :
                 for ind in population : 
                         list_novelty_metrics.append(self.base_paire_fitness(structure,ind.RNA_structure))
 
-                #list_novelty_metrics = list(set(list_novelty_metrics)) 
-
-                return sum(list_novelty_metrics[:self.k])/float(self.k)
+                
+                return np.mean(list_novelty_metrics)

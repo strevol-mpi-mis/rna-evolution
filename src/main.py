@@ -18,14 +18,14 @@ import Landscape
 def main() : 
     
    
-    population_size = 700
+    population_size = 100
     number_of_generation = 500
     mut_rate = 0.4
     mut_bp = 0.5
     lamda = 1
     k= 15
     type_ = "bp"
-    target_structure = "((....)).((....)).((....)).((....))"
+    target_structure = "(((((.....))..((.........)))))"
     init_deph = len(target_structure)
     print "Length ==", init_deph
     mut_prob = 1./(init_deph)
@@ -38,17 +38,17 @@ def main() :
     landscape = Landscape.Landscape(lamda, k, type_, target_structure)
     rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,landscape)
 
-    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,1)
+    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,2)
 
     list_fitness = [] 
     good_result = []
     for ind in result : 
-        print ind
+        print ind.RNA_structure, ind.fitness
         if ind.fitness !=0 : 
             list_fitness.append(ind.fitness)
             good_result.append(ind)
     list_fitness = sorted(list_fitness, reverse=True) 
-
+    print list_fitness
     sorted_pop = [ ] 
     for fitness in list_fitness : 
         for ind in good_result : 

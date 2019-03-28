@@ -59,7 +59,7 @@ class Initializer(object) :
                 seq = ''.join(arn)
             (strc, mfe) = RNA.fold(seq)
 
-            ind = Individual(seq,strc,self.landscape.fitness(strc), mfe)
+            ind = Individual(seq,strc, mfe,self.landscape.fitness(strc))
             population.append(ind)
 
         return population

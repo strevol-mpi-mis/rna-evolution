@@ -54,7 +54,7 @@ class RNAEvolution(object) :
         
 
         (RNA_strc, mef) = RNA.fold(''.join(RNA_seq))
-        return Individual.Individual(''.join(RNA_seq), RNA_strc,self.landscape.fitness(RNA_strc), mef)
+        return Individual.Individual(''.join(RNA_seq), RNA_strc, mef,self.landscape.fitness(RNA_strc))
 
 
 
@@ -179,7 +179,7 @@ class RNAEvolution(object) :
         n = number_of_generation
         
         logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
-        #logger.save_population(prev_population,500)
+        logger.save_population(prev_population,0)
         
         while (n > 0) :
         
@@ -195,7 +195,7 @@ class RNAEvolution(object) :
             
             prev_population = numpy.copy(newgeneration)
             n -=1
-            logger.save_population(newgeneration,number_of_generation-n+500)
+            logger.save_population(prev_population,number_of_generation-n)
 
 
         return newgeneration
