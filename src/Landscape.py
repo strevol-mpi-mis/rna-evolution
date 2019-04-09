@@ -75,7 +75,9 @@ class Landscape(object) :
                 list_novelty_metrics = []
 
                 for ind in population : 
-                        list_novelty_metrics.append(self.base_paire_fitness(structure,ind.RNA_structure))
+
+                        #list_novelty_metrics.append(self.base_paire_fitness(structure,ind.RNA_structure))
+                        list_novelty_metrics.append( 1/(1.+self.hamming_distance(structure,ind.RNA_structure)))
 
                 
                 return np.mean(list_novelty_metrics)

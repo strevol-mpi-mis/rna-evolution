@@ -87,12 +87,13 @@ def get_min_generation(interval) :
     lamdas = [1]
     result = []
     methods = ["N", "F", "S", "FREQ"]
+    #methods = [1,0]
     
     for i in range(interval[0],interval[1]) : 
         min_gen  = []
         for method in  methods : 
             try : 
-                files = os.listdir("../Logs/MyTest2/"+str(i)+"/"+str(method)+"/")
+                files = os.listdir("../Logs/BenchMark/16/"+str(i)+"/"+str(method)+"/")
                 min_gen.append(len(files)- 1) 
             except : 
                 print "Folder ", i, "missed"
@@ -163,23 +164,24 @@ def main() :
         intervales.append((folders[i], folders[i+1]))
     print intervales
     #Parallel evolution for every lamda value
-    print "Start running jog"
+    print "Start running jobs"
     jobs = [(interval, job_server.submit(get_min_generation, (interval,), modules=("numpy","pandas","os"))) for interval in intervales]
     
     #archive_strc = numpy.zeros((24,4))
     archive_strc = [] 
     for folder, job in jobs:
         res = job()
+        print folder, "===", res
         archive_strc.append(res) 
     archive_strc = numpy.concatenate(archive_strc)
 
     print archive_strc.shape
-    print "                                      ", ["|| N ||", "|| F ||", "|| S ||", "|| FREQ ||"]
+    print "                                      ", ["|| N ||", "|| F ||", "||S||", "||FREQ||"]
     print "The average number of generations is ", numpy.mean(archive_strc, axis=0)
     print "The median number of generations is ",  numpy.median(archive_strc, axis=0)
     
-    print "Number of success === ", [ len(success[success<500]) for success in archive_strc.T]
-    print "Number of failures === ", [ len(success[success==500]) for success in archive_strc.T]
+    print "Number of success === ", [ len(success[success<2000]) for success in archive_strc.T]
+    print "Number of failures === ", [ len(success[success==2000]) for success in archive_strc.T]
           
    
     

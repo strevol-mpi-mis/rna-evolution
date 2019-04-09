@@ -31,15 +31,16 @@ class RNAEvolution(object) :
     
     #Mutation function 
     def mutateOne(self, individual, mut_p, mut_bp) :  
-        base_paire = ["AU","UA","GU","GC","UG","CG"]
-        nucluotides = ["A", "G", "U", "C"]
+        base_paire = ["GC","CG", "AU", "UA", "GU", "UG"]
 
+        #base_paire = ["GC","CG"]
+        nucleotides = [ "A","C", "G","U"]
         RNA_seq = []
         for i in range(len(individual.RNA_seq)) :
             r = random.uniform(0,1)
         
             if r < mut_p[i] : 
-                selct = numpy.random.choice(nucluotides,size=1)
+                selct = numpy.random.choice(nucleotides,size=1)
                 RNA_seq.append(selct[0])
             else : 
                 RNA_seq.append(individual.RNA_seq[i])
@@ -48,11 +49,10 @@ class RNAEvolution(object) :
         for bp_cord in pos : 
             r = random.uniform(0,1)
             if r < mut_bp : 
-                bp = numpy.random.choice(base_paire,1, p=[0.1, 0.2, 0.2, 0.2, 0.2, 0.1])
+                bp = numpy.random.choice(base_paire,1, p=[0.2, 0.2, 0.2,0.2,0.1,0.1])
                 RNA_seq[bp_cord[0]] = bp[0][0]
                 RNA_seq[bp_cord[1]] = bp[0][1]
         
-
         (RNA_strc, mef) = RNA.fold(''.join(RNA_seq))
         return Individual.Individual(''.join(RNA_seq), RNA_strc, mef,self.landscape.fitness(RNA_strc))
 
@@ -99,7 +99,10 @@ class RNAEvolution(object) :
 
         proportion_prob = []
         for i in range(len(population)) : 
-            s = (1-lamda)*((population[i].fitness-min(saved_fitness))/(max(saved_fitness)-min(saved_fitness))) + lamda*(float(saved_novelty[i]-min(saved_novelty))/(max(saved_novelty)-min(saved_novelty)))
+            n =  lamda*numpy.divide(float(saved_novelty[i]-min(saved_novelty)),(max(saved_novelty)-min(saved_novelty)))
+            if numpy.isnan(n) : 
+                n = 0 
+            s = n + (1-lamda)*numpy.divide(float(population[i].fitness-min(saved_fitness)),(max(saved_fitness)-min(saved_fitness)))
             proportion_prob.append(s)
         proportion_prob = numpy.array(proportion_prob)
         choices = numpy.random.choice(population,size=size,p=proportion_prob/sum(proportion_prob))
@@ -180,8 +183,9 @@ class RNAEvolution(object) :
         
         logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
         logger.save_population(prev_population,0)
-        
-        while (n > 0) :
+        maxfitness = max([ind.fitness for ind in prev_population])
+
+        while (n > 0) and (maxfitness<1) :
         
             print ('Generation '+str(number_of_generation - n))
             newgeneration = []
@@ -194,9 +198,12 @@ class RNAEvolution(object) :
             newgeneration = numpy.insert(newgeneration, len(newgeneration),self.mutateAll(selected_ind,mut_probs,mut_bp))
             
             prev_population = numpy.copy(newgeneration)
-            n -=1
             logger.save_population(prev_population,number_of_generation-n)
 
+
+            maxfitness = max([ind.fitness for ind in prev_population])
+
+            n -=1
 
         return newgeneration
 
@@ -223,7 +230,7 @@ class RNAEvolution(object) :
         
         logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
         logger.save_population(prev_population,0)
-        
+        maxfitness = max([ind.fitness for ind in prev_population])
         while (n > 0) :
         
             print ('Generation '+str(number_of_generation - n))
@@ -258,7 +265,7 @@ class RNAEvolution(object) :
 
 
 
-    def run(self, number_of_generation,mut_probs, mut_bp, nbjobs) : 
+    def run(self, number_of_generation,mut_probs, mut_bp, nbjobs, log_fold) : 
         #tuple of all parallel python servers to connect with
         ppservers = ()
         job_server = pp.Server(nbjobs, ppservers=ppservers)
@@ -267,12 +274,12 @@ class RNAEvolution(object) :
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
         print "Start running jog"
-        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.mutateAll, self.mutateOne,),
+        jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,log_fold+str(task),mut_bp,), ( self.fitness_proportion_selection,self.mutateAll, self.mutateOne,),
                                                ("numpy", "Individual", "RNA", "random","Logger","pandas","os","Initializer", "Landscape"))) for task in tasks]
         
         for task, job in jobs : 
             gen = job()
-            result = numpy.insert(result, 0, numpy.array(gen)[:10])
+            result = numpy.insert(result, 0, numpy.array(gen)[:100])
         
         print "End of jobs"
 
