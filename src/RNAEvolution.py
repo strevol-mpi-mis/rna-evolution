@@ -37,12 +37,14 @@ class RNAEvolution(object) :
         base_paire = ["AU","UA","GU","GC","UG","CG"]
         nucluotides = ["A", "G", "U", "C"]
 
+        #base_paire = ["GC","CG"]
+        nucleotides = [ "A","C", "G","U"]
         RNA_seq = []
         for i in range(len(individual.RNA_seq)) :
             r = random.uniform(0,1)
         
             if r < mut_p[i] : 
-                selct = numpy.random.choice(nucluotides,size=1)
+                selct = numpy.random.choice(nucleotides,size=1)
                 RNA_seq.append(selct[0])
             else : 
                 RNA_seq.append(individual.RNA_seq[i])
@@ -55,7 +57,6 @@ class RNAEvolution(object) :
                 RNA_seq[bp_cord[0]] = bp[0][0]
                 RNA_seq[bp_cord[1]] = bp[0][1]
         
-
         (RNA_strc, mef) = RNA.fold(''.join(RNA_seq))
         return Individual.Individual(''.join(RNA_seq), RNA_strc, mef,self.landscape.fitness(RNA_strc))
 
@@ -224,6 +225,10 @@ class RNAEvolution(object) :
             logger.bt_save_population(selected_ind, prev_population,number_of_generation-n)
             max_fitness = max([ind.fitness for ind in prev_population])
 
+            maxfitness = max([ind.fitness for ind in prev_population])
+
+            n -=1
+
         return newgeneration
 
     
@@ -284,7 +289,7 @@ class RNAEvolution(object) :
 
 
 
-    def run(self, number_of_generation,mut_probs, mut_bp, nbjobs) : 
+    def run(self, number_of_generation,mut_probs, mut_bp, nbjobs, log_fold) : 
         #tuple of all parallel python servers to connect with
         ppservers = ()
         job_server = pp.Server(nbjobs, ppservers=ppservers)
@@ -298,7 +303,7 @@ class RNAEvolution(object) :
         
         for task, job in jobs : 
             gen = job()
-            result = numpy.insert(result, 0, numpy.array(gen)[:10])
+            result = numpy.insert(result, 0, numpy.array(gen)[:100])
         
         print "End of jobs"
 

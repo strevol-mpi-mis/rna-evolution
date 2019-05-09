@@ -48,13 +48,19 @@ class Initializer(object) :
     def initialize(self) : 
         n = 0 
         population = []
+<<<<<<< HEAD
         nucluotides = ["G", "C", "A", "U"]
+=======
+        nucluotides = [ "A", "C"]
+>>>>>>> 02deacbb2b8196054d3caa8e99062a511e3138ad
         init_depth = len(self.landscape.target_structure)
+        print init_depth
         for i in range(self.population_size):
-            if i < 4 : 
+            if i < 2 : 
                 arn = numpy.random.choice(nucluotides[i:i+1],init_depth)
                 seq = ''.join(arn)
-            else : 
+            else :
+                #numpy.random.seed(i)
                 arn = numpy.random.choice(nucluotides,init_depth)
                 seq = ''.join(arn)
             (strc, mfe) = RNA.fold(seq)
@@ -87,7 +93,7 @@ def main() :
     lamda = 0.3
     k= 15
     type_ = "ham"
-    target_structure = ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
+    #target_structure = ".....((...((....))...((....))...((....))...((....))...((....))...((....))...))...................."
     init_depth = len(target_structure)
     print "Length ==", init_depth
     mut_prob = 1./(init_depth)
