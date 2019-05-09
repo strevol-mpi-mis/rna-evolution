@@ -26,8 +26,10 @@ class Individual(object) :
         base_paire_pos = []
         for i in range(len(position)) :
             if position[i] != 0 :
-                base_paire_pos.append((i,position[i]-1))
+                if (position[i]-1,i) in base_paire_pos : 
+            	    continue; 
+        	else : 
+            	    base_paire_pos.append((i,position[i]-1))
 
         return base_paire_pos
-
     

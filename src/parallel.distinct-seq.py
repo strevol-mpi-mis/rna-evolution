@@ -92,7 +92,7 @@ def get_min_generation(interval) :
         min_gen  = []
         for method in  methods : 
             try : 
-                files = os.listdir("../Logs/MyTest2/"+str(i)+"/"+str(method)+"/")
+                files = os.listdir("../Logs/MyTest-5/"+str(i)+"/"+str(method)+"/")
                 min_gen.append(len(files)- 1) 
             except : 
                 print "Folder ", i, "missed"

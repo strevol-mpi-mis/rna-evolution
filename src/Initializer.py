@@ -48,7 +48,7 @@ class Initializer(object) :
     def initialize(self) : 
         n = 0 
         population = []
-        nucluotides = ["A", "G", "U", "C"]
+        nucluotides = ["G", "C", "A", "U"]
         init_depth = len(self.landscape.target_structure)
         for i in range(self.population_size):
             if i < 4 : 

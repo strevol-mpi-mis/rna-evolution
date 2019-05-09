@@ -82,24 +82,24 @@ def main() :
 
     """
 
-    fold = range(20)
+    fold = range(10)
     population_size = 109
-    lamdas = [1]#,0.1,0.2,0.5,1]
+    lamdas = [0]#,0.1,0.2,0.5,1]
     histoData = []
     for n in  fold: 
             print "Loading folder ", n, "S....." 
             
             maxmaxs = [] 
-            for i in range(1) : 
+            for i in range(len(lamdas)) : 
                 maxs = []
-                for g in range(1000,1001) : 
-                    dF = getFitness(population_size,"../Logs/NoveltyExp/News/old-select/"+str(n)+"/"+str(lamdas[i])+"/gen"+str(g)+".csv")
+                for g in range(500,501) : 
+                    dF = getFitness(population_size,"../Logs/MyTest-5/"+str(n)+"/"+str(lamdas[i])+"/gen"+str(g)+".csv")
                     maxs.append(max(dF))
                 maxmaxs.append(max(maxs))
             histoData.append(maxmaxs)
 
     histoData = np.array(histoData) 
-    """
+    
     success = [0,0,0,0,0]
     print histoData
     for data in histoData :
@@ -107,18 +107,10 @@ def main() :
             success[0] +=1 
         if data[1] == 1 : 
             success[1] +=1 
-        if data[2] ==1 : 
-            success[2] +=1
-
-        if data[3] ==1 : 
-            success[3] +=1
-
-        if data[4] ==1 : 
-            success[4] +=1
 
     print success
-    """
-    plt.boxplot(histoData, labels=[r"$1$"])
+    
+    plt.boxplot(histoData, labels=[ r"$0$"])
     
     plt.ylabel("Max fitness", fontweight="bold")
     plt.xlabel("Lambda", fontweight="bold")

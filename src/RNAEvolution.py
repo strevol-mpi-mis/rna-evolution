@@ -31,6 +31,9 @@ class RNAEvolution(object) :
     
     #Mutation function 
     def mutateOne(self, individual, mut_p, mut_bp) :  
+        #base_paire = ["GC","CG"]
+        #nucluotides = ["A", "G", "C"]
+
         base_paire = ["AU","UA","GU","GC","UG","CG"]
         nucluotides = ["A", "G", "U", "C"]
 
@@ -48,7 +51,7 @@ class RNAEvolution(object) :
         for bp_cord in pos : 
             r = random.uniform(0,1)
             if r < mut_bp : 
-                bp = numpy.random.choice(base_paire,1, p=[0.1, 0.2, 0.2, 0.2, 0.2, 0.1])
+                bp = numpy.random.choice(base_paire,1, p=[0.2,0.2,0.2,0.2,0.1,0.1])
                 RNA_seq[bp_cord[0]] = bp[0][0]
                 RNA_seq[bp_cord[1]] = bp[0][1]
         
@@ -80,6 +83,23 @@ class RNAEvolution(object) :
         selected = numpy.random.choice(population,size=size,p=proportion_prob)
         return selected
 
+    def ComputeEnsDiversity(self, seq): 
+        ens_div = []
+        cmd = "echo "+ str(seq)+"| RNAfold -p |tail -1|cut -d ' ' -f 11 > rest.txt" 
+        os.system(cmd)
+        dt = pandas.read_csv('rest.txt', header=None)
+            
+        return dt.values[0][0]
+
+    def ensDiversity_proportion_selection(self,population, size) : 
+        
+        ensDiv = []
+        for ind in population : 
+            ensDiv.append(self.ComputeEnsDiversity(ind.RNA_seq))
+        ensDev = numpy.array(ensDiv)
+        selected = numpy.random.choice(population,size=size,p=numpy.array(ensDiv)/sum(ensDiv))
+        return selected
+
 
     #################
     # Natural selection based on fitness proportionate and novelty proportion 
@@ -99,7 +119,7 @@ class RNAEvolution(object) :
 
         proportion_prob = []
         for i in range(len(population)) : 
-            s = (1-lamda)*((population[i].fitness-min(saved_fitness))/(max(saved_fitness)-min(saved_fitness))) + lamda*(float(saved_novelty[i]-min(saved_novelty))/(max(saved_novelty)-min(saved_novelty)))
+            s = (1-lamda)*numpy.divide((population[i].fitness-min(saved_fitness)),(max(saved_fitness)-min(saved_fitness))) + lamda*numpy.divide(float(saved_novelty[i]-min(saved_novelty)),(max(saved_novelty)-min(saved_novelty)))
             proportion_prob.append(s)
         proportion_prob = numpy.array(proportion_prob)
         choices = numpy.random.choice(population,size=size,p=proportion_prob/sum(proportion_prob))
@@ -170,7 +190,7 @@ class RNAEvolution(object) :
 
     def simple_EA(self, number_of_generation, mut_probs, log_folder, mut_bp) : 
     
-        print (" Starting of evolution ")
+        print (" Start of evolution ")
         #prev_population = self.initializer.initialize_from_csv("../Logs/NoveltyExp/News/old-select/"+str(log_folder)+"/"+str(self.landscape.lamda)+"/gen500.csv") #Initialize the population of RNA
         #prev_population = self.initializer.initialize_from_csv("../Logs/init_data/data1000_ham_30.csv") #Initialize the population of RNA
         
@@ -179,24 +199,30 @@ class RNAEvolution(object) :
         n = number_of_generation
         
         logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
-        logger.save_population(prev_population,0)
+        logger.bt_save_population(prev_population,prev_population,0)
+        max_fitness = max([ind.fitness for ind in prev_population])
+        while (n > 0) and (max_fitness < 1):
         
-        while (n > 0) :
-        
-            print ('Generation '+str(number_of_generation - n))
+            if (number_of_generation - n)%100 == 0 : 
+                print ('Generation '+str(number_of_generation - n)), "Max fitness = ", max_fitness
             newgeneration = []
             newgeneration =  self.reproduce(prev_population,int(0.1*population_size))
             
-            if self.landscape.lamda !=0 : 
+            if self.landscape.lamda >0 : 
                 selected_ind = self.novelty_selection(prev_population,population_size)
-            else:
+            elif self.landscape.lamda == 0:
                 selected_ind = self.fitness_proportion_selection(prev_population,population_size)
-            newgeneration = numpy.insert(newgeneration, len(newgeneration),self.mutateAll(selected_ind,mut_probs,mut_bp))
+            else : 
+                selected_ind = self.ensDiversity_proportion_selection(prev_population, population_size)
             
-            prev_population = numpy.copy(newgeneration)
+            mutated = self.mutateAll(selected_ind,mut_probs,mut_bp)
+            #selected_ind = numpy.insert(newgeneration, len(newgeneration),selected_ind)
+            
+            #newgeneration = numpy.insert(newgeneration, len(newgeneration),mutated)
+            prev_population = numpy.copy(mutated)
             n -=1
-            logger.save_population(prev_population,number_of_generation-n)
-
+            logger.bt_save_population(selected_ind, prev_population,number_of_generation-n)
+            max_fitness = max([ind.fitness for ind in prev_population])
 
         return newgeneration
 
@@ -215,7 +241,7 @@ class RNAEvolution(object) :
 
     def EA_with_crossover(self, number_of_generation, mut_probs, log_folder, mut_bp) : 
     
-        print (" Starting of evolution ")
+        print (" Start of evolution ")
         #prev_population = self.initializer.initialize_from_csv("../Logs/init_data/data1000_ham_ 98.csv") #Initialize the population of RNA
         prev_population = self.initializer.initialize() #Initialize the population of RNA
         population_size = self.initializer.population_size
@@ -223,8 +249,8 @@ class RNAEvolution(object) :
         
         logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
         logger.save_population(prev_population,0)
-        
-        while (n > 0) :
+        max_fitness = max([ind.fitness for ind in prev_population])
+        while (n > 0) and (max_fitness <1):
         
             print ('Generation '+str(number_of_generation - n))
             newgeneration = []
@@ -252,7 +278,7 @@ class RNAEvolution(object) :
             prev_population = numpy.copy(newgeneration)
             n -=1
             logger.save_population(newgeneration,number_of_generation-n)
-
+            max_fitness = max([ind.fitness for ind in prev_population])
 
         return newgeneration
 
@@ -263,10 +289,10 @@ class RNAEvolution(object) :
         ppservers = ()
         job_server = pp.Server(nbjobs, ppservers=ppservers)
         
-        tasks = range(nbjobs)
+        tasks = range(0, nbjobs+11, 1)
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
-        print "Start running jog"
+        print "Start running job"
         jobs = [(task, job_server.submit(self.simple_EA, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.mutateAll, self.mutateOne,),
                                                ("numpy", "Individual", "RNA", "random","Logger","pandas","os","Initializer", "Landscape"))) for task in tasks]
         
@@ -287,7 +313,7 @@ class RNAEvolution(object) :
         tasks = range(nbjobs)
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
-        print "Start running jog"
+        print "Start running job"
         jobs = [(task, job_server.submit(self.EA_with_crossover, (number_of_generation, mut_probs,task,mut_bp,), ( self.fitness_proportion_selection,self.mutateAll, self.mutateOne,self.crossover,),
                                                ("numpy", "Individual", "RNA", "random","Logger","pandas","os","Initializer", "Landscape"))) for task in tasks]
         
