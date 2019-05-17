@@ -48,15 +48,11 @@ class Initializer(object) :
     def initialize(self) : 
         n = 0 
         population = []
-<<<<<<< HEAD
-        nucluotides = ["G", "C", "A", "U"]
-=======
-        nucluotides = [ "A", "C"]
->>>>>>> 02deacbb2b8196054d3caa8e99062a511e3138ad
+        nucluotides = ["C","G", "A", "U"]
         init_depth = len(self.landscape.target_structure)
         print init_depth
         for i in range(self.population_size):
-            if i < 2 : 
+            if i < 4 : 
                 arn = numpy.random.choice(nucluotides[i:i+1],init_depth)
                 seq = ''.join(arn)
             else :

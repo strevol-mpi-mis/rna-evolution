@@ -35,10 +35,10 @@ class RNAEvolution(object) :
         #nucluotides = ["A", "G", "C"]
 
         base_paire = ["AU","UA","GU","GC","UG","CG"]
-        nucluotides = ["A", "G", "U", "C"]
+        nucleotides = ["A", "G", "U", "C"]
 
         #base_paire = ["GC","CG"]
-        nucleotides = [ "A","C", "G","U"]
+        #nucleotides = [ "A","G"]
         RNA_seq = []
         for i in range(len(individual.RNA_seq)) :
             r = random.uniform(0,1)
@@ -53,7 +53,7 @@ class RNAEvolution(object) :
         for bp_cord in pos : 
             r = random.uniform(0,1)
             if r < mut_bp : 
-                bp = numpy.random.choice(base_paire,1, p=[0.2,0.2,0.2,0.2,0.1,0.1])
+                bp = numpy.random.choice(base_paire,1, p=[0.1,0.1,0.2,0.2,0.2,0.2])
                 RNA_seq[bp_cord[0]] = bp[0][0]
                 RNA_seq[bp_cord[1]] = bp[0][1]
         
@@ -85,19 +85,28 @@ class RNAEvolution(object) :
         return selected
 
     def ComputeEnsDiversity(self, seq): 
-        ens_div = []
+        
         cmd = "echo "+ str(seq)+"| RNAfold -p |tail -1|cut -d ' ' -f 11 > rest.txt" 
         os.system(cmd)
-        dt = pandas.read_csv('rest.txt', header=None)
-            
+        dt = pandas.read_csv('rest.txt', header=None)  
         return dt.values[0][0]
 
-    def ensDiversity_proportion_selection(self,population, size) : 
-        
-        ensDiv = []
-        for ind in population : 
-            ensDiv.append(self.ComputeEnsDiversity(ind.RNA_seq))
-        ensDev = numpy.array(ensDiv)
+    def ComputeEnsDiversities(self, listOfSeq, task): 
+        df = pandas.DataFrame(listOfSeq)
+        df.to_csv("seq"+str(task)+".csv", header=False, index=False)
+        cmd = "RNAfold -p --noPS < seq"+str(task)+".csv | grep -nhr 'diversity' | cut -d ' ' -f 11 > ensDiv"+str(task)
+        os.system(cmd)
+        dt = pandas.read_csv("ensDiv"+str(task), header=None)
+
+        os.remove("seq"+str(task)+".csv")
+        os.remove("ensDiv"+str(task))
+        os.remove("dot.ps")
+        return dt.values[:, 0]
+    
+    def ensDiversity_proportion_selection(self,population, size, task) : 
+        listOfSeq = [ind.RNA_seq for ind in population]
+        ensDiv = self.ComputeEnsDiversities(listOfSeq, task)
+        ensDiv = numpy.array(ensDiv)
         selected = numpy.random.choice(population,size=size,p=numpy.array(ensDiv)/sum(ensDiv))
         return selected
 
@@ -214,7 +223,7 @@ class RNAEvolution(object) :
             elif self.landscape.lamda == 0:
                 selected_ind = self.fitness_proportion_selection(prev_population,population_size)
             else : 
-                selected_ind = self.ensDiversity_proportion_selection(prev_population, population_size)
+                selected_ind = self.ensDiversity_proportion_selection(prev_population, population_size, log_folder)
             
             mutated = self.mutateAll(selected_ind,mut_probs,mut_bp)
             #selected_ind = numpy.insert(newgeneration, len(newgeneration),selected_ind)
@@ -223,10 +232,10 @@ class RNAEvolution(object) :
             prev_population = numpy.copy(mutated)
             n -=1
             logger.bt_save_population(selected_ind, prev_population,number_of_generation-n)
-            max_fitness = max([ind.fitness for ind in prev_population])
-
-            maxfitness = max([ind.fitness for ind in prev_population])
-
+            #max_fitness = max([ind.fitness for ind in prev_population])
+            new_max = max([ind.fitness for ind in prev_population])
+            if new_max > max_fitness : 
+                max_fitness = new_max
             n -=1
 
         return newgeneration
@@ -294,7 +303,7 @@ class RNAEvolution(object) :
         ppservers = ()
         job_server = pp.Server(nbjobs, ppservers=ppservers)
         
-        tasks = range(0, nbjobs+11, 1)
+        tasks = range(0, nbjobs)
         result = numpy.array([Individual.Individual("","",0,0)])
         #Parallel evolution for every lamda value
         print "Start running job"

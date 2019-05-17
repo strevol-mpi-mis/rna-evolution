@@ -19,14 +19,14 @@ import pandas
 def main() : 
     
    
-    population_size = 100
-    number_of_generation = 200
+    population_size = 200
+    number_of_generation = 500
     #mut_rate = 0.4
     mut_bp = 0.5
     lamda = 0
     k= 80
     type_ = "ham"
-    target_structure =  ".....(((.(((((....)).)))(((.((....))))).)))...................."
+    target_structure =  "(((((.....))..((.........)))))"
     init_deph = len(target_structure)
     print "Length ==", init_deph
     mut_prob = 1./init_deph 
@@ -39,7 +39,7 @@ def main() :
     landscape = Landscape.Landscape(lamda, k, type_, target_structure)
     rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,landscape)
 
-    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,10)
+    result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,2,"ED/")
 
     list_fitness = [] 
     good_result = []

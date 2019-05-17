@@ -10,7 +10,7 @@ import pandas
 
 class Logger(object) : 
 
-    ROOT_LOG_PATH = "../Logs/BenchMark/BT/44/"
+    ROOT_LOG_PATH = "../Logs/BenchMark/BT/PP/15/"
 
     def __init__(self, logfolder, sublogfolder): 
 
