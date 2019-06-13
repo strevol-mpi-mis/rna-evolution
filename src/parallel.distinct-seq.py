@@ -86,24 +86,20 @@ def get_distinct_structure(interval, folder_num) :
 def get_min_generation(interval) : 
     lamdas = [1]
     result = []
-    methods = ["N", "F", "S", "FREQ"]
+    methods = ["ED", "EDV", "F"]
     #methods = [1,0]
     
     for i in range(interval[0],interval[1]) : 
         min_gen  = []
         for method in  methods : 
             try : 
-<<<<<<< HEAD
-                files = os.listdir("../Logs/MyTest-5/"+str(i)+"/"+str(method)+"/")
-=======
-                files = os.listdir("../Logs/BenchMark/16/"+str(i)+"/"+str(method)+"/")
->>>>>>> 02deacbb2b8196054d3caa8e99062a511e3138ad
-                min_gen.append(len(files)- 1) 
+                files = os.listdir("../Logs/Defect/66/"+str(i)+"/"+str(method)+"/")
+                min_gen.append(len(files)/2 -1) 
             except : 
                 print "Folder ", i, "missed"
                 continue
             
-        if len(min_gen) == 4 : 
+        if len(min_gen) == 3 : 
             result.append(min_gen)
     result = numpy.array(result)
     print 'Job numer ',interval," = ",  result.shape
@@ -184,8 +180,8 @@ def main() :
     print "The average number of generations is ", numpy.mean(archive_strc, axis=0)
     print "The median number of generations is ",  numpy.median(archive_strc, axis=0)
     
-    print "Number of success === ", [ len(success[success<2000]) for success in archive_strc.T]
-    print "Number of failures === ", [ len(success[success==2000]) for success in archive_strc.T]
+    print "Number of success === ", [ len(success[success<100]) for success in archive_strc.T]
+    print "Number of failures === ", [ len(success[success==100]) for success in archive_strc.T]
           
    
     

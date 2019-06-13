@@ -23,7 +23,7 @@ def main() :
     number_of_generation = 500
     #mut_rate = 0.4
     mut_bp = 0.5
-    lamda = 0
+    lamda = -1
     k= 80
     type_ = "ham"
     target_structure =  "(((((.....))..((.........)))))"

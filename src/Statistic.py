@@ -82,38 +82,33 @@ def main() :
 
     """
 
-    fold = range(10)
+    fold = range(4)
     population_size = 109
     lamdas = [0]#,0.1,0.2,0.5,1]
     histoData = []
+    methods = ["ED", "EDV", "F"]
     for n in  fold: 
             print "Loading folder ", n, "S....." 
             
             maxmaxs = [] 
-            for i in range(len(lamdas)) : 
+            for meth in methods: 
                 maxs = []
-                for g in range(500,501) : 
-                    dF = getFitness(population_size,"../Logs/MyTest-5/"+str(n)+"/"+str(lamdas[i])+"/gen"+str(g)+".csv")
-                    maxs.append(max(dF))
-                maxmaxs.append(max(maxs))
+                for g in range(101) : 
+                    dF = getFitness(population_size,"../Logs/Defect/66/"+str(n)+"/"+meth+"/gen"+str(g)+".csv")
+                    maxs.append(np.mean(dF))
+                maxmaxs.append(maxs)
             histoData.append(maxmaxs)
 
     histoData = np.array(histoData) 
+    means = np.mean(histoData, axis=0)
+    print means.shape
     
-    success = [0,0,0,0,0]
-    print histoData
-    for data in histoData :
-        if data[0] == 1 : 
-            success[0] +=1 
-        if data[1] == 1 : 
-            success[1] +=1 
-
-    print success
+    for i in range(len(methods)): 
+        plt.plot(means[i],label = methods[i])
+    plt.legend(loc="lower right")
     
-    plt.boxplot(histoData, labels=[ r"$0$"])
-    
-    plt.ylabel("Max fitness", fontweight="bold")
-    plt.xlabel("Lambda", fontweight="bold")
+    plt.ylabel("Mean fitness fitness", fontweight="bold")
+    plt.xlabel("Generation", fontweight="bold")
     #plt.savefig("../Logs/NoveltyExp/max-fitness-histo.eps")
     #plt.savefig("../Logs/NoveltyExp/max-fitness-histo.png")
     plt.show()

@@ -37,17 +37,11 @@ class RNAEvolution(object) :
         base_paire = ["AU","UA","GU","GC","UG","CG"]
         nucleotides = ["A", "G", "U", "C"]
 
-        #base_paire = ["GC","CG"]
-        #nucleotides = [ "A","G"]
-        RNA_seq = []
-        for i in range(len(individual.RNA_seq)) :
-            r = random.uniform(0,1)
-        
-            if r < mut_p[i] : 
-                selct = numpy.random.choice(nucleotides,size=1)
-                RNA_seq.append(selct[0])
-            else : 
-                RNA_seq.append(individual.RNA_seq[i])
+        RNA_seq = numpy.array(list(individual.RNA_seq))
+        r = numpy.random.rand(len(individual.RNA_seq))
+        mut_pos =RNA_seq[r<mut_p] 
+        choices = numpy.random.choice(nucleotides, len(mut_pos))
+        RNA_seq[r<mut_probs] = choices 
         pos = individual.get_bp_position(self.landscape.target_structure)
 
         for bp_cord in pos : 
