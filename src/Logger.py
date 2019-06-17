@@ -10,7 +10,7 @@ import pandas
 
 class Logger(object) : 
 
-    ROOT_LOG_PATH = "../Logs/BenchMark/BT/PP/15/"
+    ROOT_LOG_PATH = "../Logs/BenshMark/Defect/"
 
     def __init__(self, logfolder, sublogfolder): 
 
@@ -41,4 +41,3 @@ class Logger(object) :
         prev_dataFrame = pandas.DataFrame(prev_data)
         prev_dataFrame.to_csv(self.root_path+"/prev_gen"+str(gen)+".csv")
         dataFrame.to_csv(self.root_path+"/gen"+str(gen)+".csv")
-        

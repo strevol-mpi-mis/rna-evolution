@@ -23,25 +23,51 @@ class Initializer(object) :
         
         self.population_size = population_size 
         self.landscape = landscape
+    
+    
+    def get_bp_position(self) : 
 
+        position = RNA.ptable(self.landscape.target_structure)
+        position = list(position[1:])
+
+        base_paire_pos = []
+        for i in range(len(position)) :
+            if position[i] != 0 :
+                if (position[i]-1,i) in base_paire_pos : 
+            	    continue; 
+        	else : 
+            	    base_paire_pos.append((i,position[i]-1))
+
+        return base_paire_pos
 
     def init(self) : 
         pos = self.get_bp_position()
-        nucluotides = ["A", "U", "G", "C"]
+        nucleotides = ["A", "U", "G", "C"]
         base_paire = ["AU","UA","GU","GC","UG","CG"]
-        arn = numpy.random.choice(nucluotides,len(self.landscape.target_structure))
         pop = []
         i = 0
         while i < self.population_size : 
             
+            if i < 4 : 
+                arn = numpy.random.choice(nucleotides[i:i+1],len(self.landscape.target_structure))
+            else : 
+                arn = numpy.random.choice(nucleotides,len(self.landscape.target_structure))
+
             for bp_cord in pos : 
                 bp = numpy.random.choice(base_paire,1)
                 arn[bp_cord[0]] = bp[0][0]
                 arn[bp_cord[1]] = bp[0][1]
             pop.append(''.join(arn))
             i = len(set(pop))
-            
-        return numpy.array(list(set(pop)))
+
+        pop = numpy.array(list(set(pop)))
+        
+        init_pop = []
+        for seq in pop:
+            strc,mfe = RNA.fold(seq)
+            init_pop.append(Individual(seq, strc, mfe, self.landscape.fitness(strc)))
+        
+        return init_pop
     
     
 
