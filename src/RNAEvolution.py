@@ -37,7 +37,7 @@ class RNAEvolution(object) :
         RNA_seq = numpy.array(list(individual.RNA_seq))
         r = numpy.random.rand(len(individual.RNA_seq))
         mut_pos =RNA_seq[r<mut_probs] 
-        choices = numpy.random.choice(nucleotides, len(mut_pos))
+        choices = numpy.random.choice(nucleotides, len(mut_pos),p=[0.2, 0.8])
         RNA_seq[r<mut_probs] = choices 
         pos = individual.get_bp_position(self.landscape.target_structure)
 

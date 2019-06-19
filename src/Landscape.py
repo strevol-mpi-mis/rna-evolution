@@ -16,6 +16,8 @@ import random
 import math
 import RNA
 
+import subprocess 
+
 
 class Landscape(object) : 
 
@@ -79,3 +81,35 @@ class Landscape(object) :
                         list_novelty_metrics.append(1/(1.+metric))
                 
                 return np.mean(list_novelty_metrics)
+
+        def min_ens_distance(self, sequence, min_energy) : 
+                rnasubopt = subprocess.Popen(args=['RNAsubopt', '-e', str(min_energy)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                rnasubopt_out, rnasubopt_err = rnasubopt.communicate(sequence) 
+
+                cut_pipe = subprocess.Popen(['cut', '-f', '1', '-d', ' '], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                cut_out, stderr = cut_pipe.communicate(rnasubopt_out)
+                
+                list_subopt =  cut_out.split()[1:] 
+
+                return max([self.fitness(subopt) for subopt in list_subopt])
+
+
+
+        def ens_defect(self, sequence) : 
+                p = subprocess.Popen("defect", stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                cmd_input = sequence+"\n"+self.landscape.target_structure+"\n"
+                
+                defect, error = p.communicate(cmd_input)
+                defect = defect.split("\n")
+                return 1/float(defect[-3])
+        
+        def my_ens_def(self, sequence, min_energy) : 
+                rnasubopt = subprocess.Popen(args=['RNAsubopt', '-e', str(min_energy)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                rnasubopt_out, rnasubopt_err = rnasubopt.communicate(sequence) 
+                result = np.array([[s.split()[0], s.split()[1]] for s in rnasubopt_out.split("\n")[1:-1]])
+                d_s = np.array([self.fitness(sigma) for sigma in result[:,0]])
+                kt = 0.612 
+                z = sum(np.exp(-np.array(result[:,1], dtype=float)/kt))
+                p = np.exp(-np.array(result[:,1], dtype=float)/kt)/z
+
+                return sum(p*d_s)

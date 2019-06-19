@@ -19,8 +19,8 @@ import pandas
 def main() : 
     
    
-    population_size = 200
-    number_of_generation = 500
+    population_size = 100
+    number_of_generation = 200
     mut_rate = 0.4
     mut_bp = 0.5
     lamda = -1
