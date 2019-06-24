@@ -160,6 +160,22 @@ def min_ens_distance_proportion_selection(population, size, target) :
     selected = numpy.random.choice(population,size=size,p=numpy.array(ensDist)/sum(ensDist))
     return selected
 
+def my_ens_def(sequence, min_energy=1.0) : 
+    rnasubopt = subprocess.Popen(args=['RNAsubopt', '-e', str(min_energy)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    rnasubopt_out, rnasubopt_err = rnasubopt.communicate(sequence) 
+    result = numpy.array([[s.split()[0], s.split()[1]] for s in rnasubopt_out.split("\n")[1:-1]])
+    d_s = numpy.array([fitness(sigma) for sigma in result[:,0]])
+    kt = 0.612 
+    z = sum(numpy.exp(-numpy.array(result[:,1], dtype=float)/kt))
+    p = numpy.exp(-numpy.array(result[:,1], dtype=float)/kt)/z
+
+    return sum(p*d_s)
+
+def my_ens_def_proportion_selection(population, size, target) : 
+    
+    myED = [my_ens_def(ind.RNA_seq) for ind in population]
+    selected = numpy.random.choice(population,size=size,p=numpy.array(myED)/sum(myED))
+    return selected
     
 def frequency_proportion_selection(population, size) : 
     

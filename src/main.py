@@ -26,6 +26,7 @@ def main() :
     lamda = -1
     k= 15
     type_ = "ham"
+    method = "MDE"
     
     data = pandas.read_csv("defect-data.csv", sep=";")
     print len(data.values), len(list(set(data.values[:,0]))), data.values[:,0]
@@ -46,7 +47,7 @@ def main() :
         mut_probs[mut_probs>mut_prob] = 0
 
         landscape = Landscape.Landscape(lamda, k, type_, target_structure)
-        rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,landscape)
+        rna_evolution = RNAEvolution.RNAEvolution(population_size,0,None,landscape, method)
 
         result = rna_evolution.run(number_of_generation,mut_probs,mut_bp,4, str(line[0])+"/")
 

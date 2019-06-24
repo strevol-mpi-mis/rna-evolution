@@ -20,10 +20,11 @@ import subprocess
 
 class RNAEvolution(object) : 
 
-    def __init__ (self, population_size, lamda, archive, landscape) : 
+    def __init__ (self, population_size, lamda, archive, landscape, select_meth) : 
 
         self.population_size = population_size 
         self.lamda = lamda
+        self.select_meth = select_meth
         self.archive = archive
         self.initializer = Initializer.Initializer(landscape, population_size)
         self.landscape = landscape
@@ -107,6 +108,23 @@ class RNAEvolution(object) :
         selected = numpy.random.choice(population,size=size,p=numpy.array(ensDefect)/sum(ensDefect))
         return selected
 
+    def min_ens_distance(self,sequence, min_energy=5.0) : 
+        rnasubopt = subprocess.Popen(args=['RNAsubopt', '-e', str(min_energy)], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        rnasubopt_out, rnasubopt_err = rnasubopt.communicate(sequence) 
+
+        cut_pipe = subprocess.Popen(['cut', '-f', '1', '-d', ' '], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cut_out, stderr = cut_pipe.communicate(rnasubopt_out)
+        
+        list_subopt =  cut_out.split()[1:] 
+
+        return max([self.landscape.fitness(subopt) for subopt in list_subopt])
+
+
+    def min_ens_distance_proportion_selection(self,population, size, target) : 
+        
+        ensDist = [self.min_ens_distance(ind.RNA_seq) for ind in population]
+        selected = numpy.random.choice(population,size=size,p=numpy.array(ensDist)/sum(ensDist))
+        return selected
     #################
     # Natural selection based on fitness proportionate and novelty proportion 
     def novelty_selection(self,population,size) : 
@@ -201,7 +219,7 @@ class RNAEvolution(object) :
         population_size = self.initializer.population_size
         n = number_of_generation
         
-        logger = Logger.Logger(str(log_folder),str(self.landscape.lamda))
+        logger = Logger.Logger(str(log_folder),str(self.select_meth))
         logger.save_population(prev_population,0)
         max_fitness = max([ind.fitness for ind in prev_population])
         newgeneration = numpy.copy(prev_population)
@@ -212,12 +230,12 @@ class RNAEvolution(object) :
             newgeneration = []
             newgeneration =  self.reproduce(prev_population,int(0.1*population_size))
             
-            if self.landscape.lamda >0 : 
+            if self.select_meth == "N" : 
                 selected_ind = self.novelty_selection(prev_population,population_size)
             elif self.landscape.lamda == 0:
                 selected_ind = self.fitness_proportion_selection(prev_population,population_size)
-            else : 
-                selected_ind = self.ensDefect_proportion_selection(prev_population, population_size)
+            elif self.select_meth == "MDE"  : 
+                selected_ind = self.min_ens_distance(prev_population, population_size)
             
             mutated = self.mutateAll(selected_ind,mut_probs,mut_bp)
             #selected_ind = numpy.insert(newgeneration, len(newgeneration),selected_ind)
